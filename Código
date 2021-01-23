@@ -1,0 +1,260 @@
+# Código Proyecto 
+
+
+#Paquetes utilizados
+
+library(ggplot2)
+
+
+# Carga y filtrado de datos.
+
+setwd("C:/Users/mauiu/Desktop")
+data <- read.csv(file = 'Proyecto.csv')
+data <- na.omit(data)
+data <- data[,c(-1, -14, -21)]
+data$Attrition[data$Attrition == 'Yes'] <- 1
+data$Attrition[data$Attrition == 'No'] <- 0
+data$Attrition <- as.numeric(data$Attrition)
+
+# los datos del vector de center son las medias redondeadas de cada variable numérica
+
+data1 <- scale(data[,c(1,2,3,4,5,6,10,11,14,17,18,19,20,21:26)], 
+               center = c(3,3,3,3,3,37,9,3,2,65059,3,15,8,1,11,3,7,2,4),scale = FALSE)
+dataf <- cbind(data1, data[,c(7,8,9,12,13,15,16)])
+
+
+# Gráficas del análisis exploratorio. 
+
+# Attrition
+
+# Data frame
+da <- data.frame( category=c("Attrition: Yes", "Attrition: No"),
+                  count=c(695, 3605))
+da$fraction <- da$count / sum(da$count)
+da$ymax <- cumsum(da$fraction)
+da$ymin <- c(0, head(da$ymax, n=-1))
+da$labelPosition <- (da$ymax + da$ymin) / 2
+da$label <- paste0(da$category, "\n ", da$count)
+#Plot
+ggplot(da, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
+  geom_rect(col = 'White') +
+  geom_text( x=2, aes(y=labelPosition, label=label, color=category), size=3.5) +
+  scale_fill_brewer(palette='Paired') +
+  scale_color_manual(values = c('#000000', '#000000')) +
+  coord_polar(theta="y") +
+  xlim(c(-1, 5)) +
+  theme_void() +
+  theme(legend.position = "none")
+
+# Business Travel
+
+# Data frame
+rt <- data.frame(BusinessTravel = names(table(data[which(data$Attrition == 1),8])),
+                 value = as.vector(table(data[which(data$Attrition == 1),8]))/as.vector(table(data$BusinessTravel)))
+# Plot
+rtg <- ggplot(rt, aes(x=BusinessTravel, y = value, fill = BusinessTravel)) +
+  geom_bar(stat="identity", width=.5, color = 'black')  + theme_void()+
+  scale_fill_brewer(palette = 'Accent') +
+  theme(legend.position="left", plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Tasa de Rotaciones") + 
+  geom_text(aes(label = c('8.18%', '24.59%', '15.07%')),  
+            position = position_stack(vjust = 0.5), size = 3)
+
+# Marital Status
+
+# Data frame
+rm <- data.frame(Status= names(table(data[which(data$Attrition == 1),16])),
+                 value = as.vector(table(data[which(data$Attrition == 1),16]))/as.vector(table(data$MaritalStatus)))
+# Plot
+rmg <- ggplot(rm, aes(x=Status, y = value, fill = Status)) +
+  geom_bar(stat="identity", width=.5, color = 'black')  + theme_void()+
+  scale_fill_brewer(palette = 'Accent') +
+  ggtitle("Tasa de Rotaciones") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  geom_text(aes(label = c('9.90%', '12.75%', '25.32%')),  
+            position = position_stack(vjust = 0.5), size = 3)
+
+# Job Satisfaction 
+
+# Data frame 
+rjs<- data.frame(Satisfaction = c('Low', 'Medium', 'High', 'Very High'),
+                 value = as.vector(table(data[which(data$Attrition == 1),4]))/as.vector(table(data$JobSatisfaction)))
+rjs$Satisfaction <- factor(rjs$Satisfaction, levels = c('Low', 'Medium', 'High', 'Very High'))
+# Plot
+rjsg <- ggplot(rjs, aes(x=Satisfaction, y = value, fill = Satisfaction)) +
+  geom_bar(stat="identity", width=.8, color = 'black')  + theme_void()+
+  scale_fill_brewer(palette = 'Accent') +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Tasa de Rotaciones") + 
+  geom_text(aes(label = c('22.90%', '16.40%', '16.51%', '11.39%')),  
+            position = position_stack(vjust = 0.5), size = 3)
+
+# Environment Satisfaction
+
+# Data frame
+res <- data.frame(Satisfaction = c('Low', 'Medium', 'High', 'Very High'),
+                  value = as.vector(table(data[which(data$Attrition == 1),3]))/as.vector(table(data$EnvironmentSatisfaction)))
+res$Satisfaction <- factor(res$Satisfaction, levels = c('Low', 'Medium', 'High', 'Very High'))
+# Plot
+resg <- ggplot(res, aes(x=Satisfaction, y = value, fill = Satisfaction)) +
+  geom_bar(stat="identity", width=.8, color = 'black')  + theme_void()+
+  scale_fill_brewer(palette = 'Accent') +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Tasa de Rotaciones") + 
+  geom_text(aes(label = c('25.42%', '15.01%', '13.72%', '13.49%')),  
+            position = position_stack(vjust = 0.5), size = 3)
+
+# Work Life Balance
+
+#Data frame 
+rwl <- data.frame(Level = c('Bad', 'Good', 'Better', 'Best'),
+                  value = as.vector(table(data[which(data$Attrition == 1),5]))/as.vector(table(data$WorkLifeBalance)))
+rwl$Level <- factor(rwl$Level, levels = c('Bad', 'Good', 'Better', 'Best'))
+# Plot
+rwlg <- ggplot(rwl, aes(x=Level, y = value, fill = Level)) +
+  geom_bar(stat="identity", width=.8, color = 'black')  + theme_void()+
+  scale_fill_brewer(palette = 'Accent') +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Tasa de Rotaciones") + 
+  geom_text(aes(label = c('30.93%', '16.61%', '14.37%', '17.77%')),  
+            position = position_stack(vjust = 0.5), size = 3)
+
+# Age
+
+# Data frame
+ba <- data.frame(name=c(rep("Edades (Total)", 4300), rep("Edades (Rotaciones)", 695)),
+                 value= c(data$Age, data[which(data$Attrition == 1),6]))
+# Plot
+bag <- ggplot(ba, aes(x=name, y=value, fill=name)) +
+  geom_boxplot(width = 0.5) +
+  theme_minimal() + scale_fill_brewer(palette = 'Accent') +
+  geom_jitter(color="grey", size=0.4, alpha=0.9) +
+  stat_summary(fun=mean, geom="point", shape=25, size=2.5, color="black", fill="red") +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Edad") + xlab('') + ylab('')
+
+# Number of companies worked
+
+# Data frame
+nc <- data.frame(name=c( rep("# Compañías (Total)",4300),rep("# Compañías (Rotaciones)", 695)),
+                 value= c(data$NumCompaniesWorked, data[which(data$Attrition == 1),18]))
+# Plot
+ncg <- ggplot(nc, aes(x=name, y=value, fill=name)) +
+  geom_boxplot(width = 0.5) +
+  theme_minimal() + scale_fill_brewer(palette = 'Accent') +
+  geom_jitter(color="grey", size=0.4, alpha=0.9) +
+  stat_summary(fun=mean, geom="point", shape=25, size=2.5, color="black", fill="red") +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Número de Compañias en las que ha Trabajado") + xlab('') + ylab('')
+
+# Total working years
+
+# Data frame 
+wy <- data.frame(name=c( rep("Años Trabajados (Total)",4300),rep("Años Trabajados (Rotaciones)", 695)),
+                 value= c(data$TotalWorkingYears, data[which(data$Attrition == 1),22]))
+# Plot
+wyg <- ggplot(wy, aes(x=name, y=value, fill=name)) +
+  geom_boxplot(width = 0.5) +
+  theme_minimal() + scale_fill_brewer(palette = 'Accent') +
+  geom_jitter(color="grey", size=0.4, alpha=0.9) +
+  stat_summary(fun=mean, geom="point", shape=25, size=2.5, color="black", fill="red") +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Total de Años Trabajados por el Empleado") + xlab('') + ylab('')
+
+# Training times last year
+
+# Data frame
+tt <- data.frame(name=c( rep("# Capacitaciones (Total)",4300),rep("# Capacitaciones (Rotaciones)", 695)),
+                 value= c(data$TrainingTimesLastYear, data[which(data$Attrition == 1),23]))
+# Plot
+ttg <- ggplot(tt, aes(x=name, y=value, fill=name)) +
+  geom_boxplot(width = 0.5) +
+  theme_minimal() + scale_fill_brewer(palette = 'Accent') +
+  geom_jitter(color="grey", size=0.4, alpha=0.9) +
+  stat_summary(fun=mean, geom="point", shape=25, size=2.5, color="black", fill="red") +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Número de Capacitaciones") + xlab('') + ylab('')
+
+# Years since last promotion 
+
+# Data frame
+lp <- data.frame(name=c( rep("# Años desde Último Ascenso (Total)",4300),rep("# Años desde Último Ascenso (Rotaciones)", 695)),
+                 value= c(data$YearsSinceLastPromotion  , data[which(data$Attrition == 1),25]))
+# Plot
+lpg <- ggplot(lp, aes(x=name, y=value, fill=name)) +
+  geom_boxplot(width = 0.5) +
+  theme_minimal() + scale_fill_brewer(palette = 'Accent') +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  geom_jitter(color="grey", size=0.4, alpha=0.9) +
+  stat_summary(fun=mean, geom="point", shape=25, size=2.5, color="black", fill="red") +
+  ggtitle("Años desde Último Ascenso") + xlab('') + ylab('')
+
+# YearsWithCurrManage 
+
+# Data frame
+ym <- data.frame(name=c( rep("# Años con Gerente (Total)",4300),rep("# Años con Gerente (Rotaciones)", 695)),
+                 value= c(data$YearsWithCurrManage , data[which(data$Attrition == 1),26]))
+# Plot
+ymg <- ggplot(ym, aes(x=name, y=value, fill=name)) +
+  geom_boxplot(width = 0.5) +
+  theme_minimal() + scale_fill_brewer(palette = 'Accent') +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) +
+  geom_jitter(color="grey", size=0.4, alpha=0.9) +
+  stat_summary(fun=mean, geom="point", shape=25, size=2.5, color="black", fill="red") +
+  ggtitle("Numero de Años con el Mismo Gerente") + xlab('') + ylab('')
+
+
+# Aplicación del modelo 
+
+# Modelo Completo
+
+modeloc <- glm(Attrition ~., family = binomial, data = dataf)
+stepAIC(modeloc)
+
+# Modelo Final
+
+modelo <- glm(Attrition ~ EnvironmentSatisfaction + JobSatisfaction +  WorkLifeBalance + 
+                Age + NumCompaniesWorked + TotalWorkingYears + TrainingTimesLastYear + 
+                YearsSinceLastPromotion + YearsWithCurrManager + BusinessTravel + 
+                MaritalStatus, family = binomial, data = dataf)
+# Summary
+
+summary(modelo)
+
+# Coeficientes para cada variable
+
+# BusinessTravelTravel_Frequently
+btf <- 1.462691
+#MaritalStatusSingle
+mss <- 1.163915
+# BusinessTravelTravel_Rarely 
+btr <- 0.727327
+# MaritalStatusMarried  
+msm <- 0.289532
+# YearsSinceLastPromotion 
+ylp <- 0.153942
+# NumCompaniesWorked 
+ncw <- 0.121602
+# Age
+age <- -0.029613
+# TotalWorkingYears 
+twy <- -0.063997 
+#TrainingTimesLastYear 
+ttl <-  -0.145415
+# YearsWithCurrManager 
+ywm <- -0.143212   
+# WorkLifeBalance 
+wlb <- -0.306328
+#EnvironmentSatisfaction
+envs <- -0.308987
+# JobSatisfaction 
+jobs <- -0.315853
+
+# Cálculo de aumento y decremento de probabilidades
+
+control <- exp( -3.598639 + 0*(envs) + 0*(jobs) +  0*(wlb) + 0*(age) +
+                  0*(ncw) + 0*(twy) + 0*(ttl) + 0*(ylp) + 
+                  0*(ywm) + 0*(btr) + 0*(btf) + 0*(msm) + 0*(mss))
+
+control/(1+control)
+control/(1+control) - 0.02663225
